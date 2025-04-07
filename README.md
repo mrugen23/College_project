@@ -156,5 +156,3 @@ pip install mysql-connector-python
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-Project Link: [https://github.com/yourusername/expense-management-system](https://github.com/yourusername/expense-management-system)
