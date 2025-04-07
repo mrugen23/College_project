@@ -1,4 +1,4 @@
-# Personal Finance Tracker Backend
+# Backend
 
 This is the backend for a personal finance tracker application that helps users manage their budgets, track expenses, and split expenses in groups.
 
