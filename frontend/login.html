@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Personal Finance Tracker</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="logo-container">
+                <img src="wealth.png" alt="Personal Finance Tracker Logo" class="logo">
+            </div>
+            <h1>Log in to your account</h1>
+            <p class="auth-subtitle">Track your expenses and manage your finances</p>
+
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="primary-button login-btn">
+                    <span class="btn-text">Log In</span>
+                    <span class="btn-loader" style="display: none;">
+                        <div class="loading-spinner"></div>
+                    </span>
+                </button>
+            </form>
+            
+            <p class="register-link">Don't have an account? <a href="register.html">Register now</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const button = document.querySelector('.login-btn');
+            const buttonText = document.querySelector('.btn-text');
+            const buttonLoader = document.querySelector('.btn-loader');
+            
+            // Disable button and show loader
+            button.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoader.style.display = 'block';
+            
+            try {
+                const response = await fetch('http://localhost:5002/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store token and redirect
+                    localStorage.setItem('token', data.token);
+                    window.location.href = 'home.html';
+                } else {
+                    // Show error
+                    alert(data.error || 'Login failed');
+                    
+                    // Reset button
+                    button.disabled = false;
+                    buttonText.style.display = 'block';
+                    buttonLoader.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert('Failed to connect to server. Please try again later.');
+                
+                // Reset button
+                button.disabled = false;
+                buttonText.style.display = 'block';
+                buttonLoader.style.display = 'none';
+            }
+        });
+        
+        // Check if user is already logged in
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                window.location.href = 'home.html';
+            }
+        };
+    </script>
+</body>
+</html>

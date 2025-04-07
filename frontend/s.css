@@ -1,0 +1,80 @@
+*{
+    margin: 0%;
+    padding: 0%;
+}
+body{
+    background-image: url("bg.png");
+    background-size: 100% 740px;
+}
+.logo img{
+    width: 200px;
+    height: 90px;
+    background: transparent;
+    margin-left: 1%;
+}
+.contain{
+    width: 300px;
+    height: 375px;
+    background-color : rgb(1, 1, 64);
+    margin-left: 39%;
+    margin-top: 6%;
+    text-align: center;
+    color: white;
+}
+.contain h2{
+    font-size: 34px;
+    color: aqua;
+}
+.contain .text{
+    position:  relative;
+    top: 7%;
+}
+
+.inp1{
+    border: none;
+    background-color:rgb(1, 1, 64);
+    border-bottom: 2px solid white;
+    width: 250px;
+    font-size: 20px;
+    margin-top: 40px;
+    outline: none;
+    color: white;
+}
+
+.inp2{
+    border: none;
+    background-color: rgb(1, 1, 64);
+    border-bottom: 2px solid white;
+    width: 250px;
+    font-size: 20px;
+    margin-top: 40px;
+    outline: none;
+    color: white;
+}
+.inp3{
+    border: none;
+    background-color: rgb(1, 1, 64);
+    border-bottom: 2px solid white;
+    width: 250px;
+    font-size: 20px;
+    margin-top: 40px;
+    outline: none;
+    color: white;
+}
+.text button{
+    width: 250px;
+    height: 44px;
+    background-color: aqua;
+    color: black;
+    border: none;
+    font-size: 24px;
+    border-radius: 25px;
+    margin-top: 30px;
+    cursor: pointer;
+}
+button:hover{
+border: 3px solid aqua;
+color: white;
+font-size: 20px;
+background-color: black;
+}

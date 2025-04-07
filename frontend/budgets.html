@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Budgets - Personal Finance Tracker</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="budgets.css">
+    <script src="navbar.js"></script>
+    <script src="footer.js"></script>
+</head>
+<body>
+    <!-- This div will contain the navbar -->
+    <div id="navbar-container"></div>
+    
+    <div class="container">
+        <header>
+            <a href="home.html" class="back-button">← Back to Home</a>
+            <div class="logo">
+                <img src="wealth.png" alt="logo">
+            </div>
+        </header>
+
+        <main>
+            <div class="budgets-header">
+                <h1>Manage Your Budgets</h1>
+                <button id="createBudgetBtn" class="primary-button">Create New Budget</button>
+            </div>
+
+            <div class="budgets-container">
+                <div id="budgetList" class="all-budgets-section">
+                    <h2>All Budgets</h2>
+                    <div id="budgetsList" class="budgets-list">
+                        <!-- Budgets will be added here dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Budget Details Section (Initially Hidden) -->
+                <div id="budgetDetails" class="budget-details-section" style="display: none;">
+                    <div class="details-header">
+                        <button class="back-button" onclick="backToBudgetList()">← Back to Budgets</button>
+                        <div id="selectedBudgetDetails"></div>
+                    </div>
+                    
+                    <div class="budget-progress">
+                        <div class="progress-stats">
+                            <div class="progress-stat">
+                                <span class="label">Total Spent:</span>
+                                <span id="budgetTotalSpent" class="value">₹0.00</span>
+                            </div>
+                            <div class="progress-stat">
+                                <span class="label">Budget Usage:</span>
+                                <span id="budgetPercentage" class="value">0%</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="budgetProgressBar" class="progress-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="budget-actions">
+                        <button class="primary-button" onclick="openModal('addExpenseModal')">Add Expense</button>
+                        <button class="secondary-button" onclick="openEditBudget()">Edit Budget</button>
+                        <button class="danger-button" onclick="confirmDeleteBudget()">Delete Budget</button>
+                    </div>
+                    
+                    <h3>Budget Expenses</h3>
+                    <div id="budgetExpensesList" class="expenses-list">
+                        <!-- Budget expenses will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Create Budget Modal -->
+        <div id="createBudgetModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal('createBudgetModal')">&times;</span>
+                <h2>Create New Budget</h2>
+                <form id="createBudgetForm">
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <input type="text" id="category" name="category" required placeholder="e.g., Monthly Expenses, Groceries, Travel">
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Budget Amount (₹)</label>
+                        <input type="number" id="amount" name="amount" min="0" step="0.01" required placeholder="Enter amount">
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate">Start Date</label>
+                        <input type="date" id="startDate" name="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date</label>
+                        <input type="date" id="endDate" name="endDate" required>
+                    </div>
+                    <button type="submit" class="primary-button">Create Budget</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Budget Modal -->
+        <div id="editBudgetModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal('editBudgetModal')">&times;</span>
+                <h2>Edit Budget</h2>
+                <form id="editBudgetForm">
+                    <input type="hidden" id="editBudgetId">
+                    <div class="form-group">
+                        <label for="editCategory">Category</label>
+                        <input type="text" id="editCategory" name="editCategory" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAmount">Budget Amount (₹)</label>
+                        <input type="number" id="editAmount" name="editAmount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStartDate">Start Date</label>
+                        <input type="date" id="editStartDate" name="editStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEndDate">End Date</label>
+                        <input type="date" id="editEndDate" name="editEndDate" required>
+                    </div>
+                    <button type="submit" class="primary-button">Update Budget</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Budget Details Modal -->
+        <div id="budgetDetailsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal('budgetDetailsModal')">&times;</span>
+                <h2 id="detailsTitle">Budget Details</h2>
+                <div id="budgetDetails" class="budget-details">
+                    <!-- Budget details will be displayed here -->
+                </div>
+                <div class="modal-actions">
+                    <button id="addExpenseBtn" class="primary-button">Add Expense</button>
+                    <button id="editBudgetBtn" class="secondary-button">Edit Budget</button>
+                    <button id="deleteBudgetBtn" class="danger-button">Delete Budget</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Expense Modal -->
+        <div id="addExpenseModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal('addExpenseModal')">&times;</span>
+                <h2>Add Expense to <span id="expenseBudgetName"></span></h2>
+                <form id="addExpenseForm">
+                    <input type="hidden" id="expenseBudgetCategory">
+                    <div class="form-group">
+                        <label for="expenseDescription">Description</label>
+                        <input type="text" id="expenseDescription" name="expenseDescription" required placeholder="e.g., Grocery shopping, Rent, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseAmount">Amount (₹)</label>
+                        <input type="number" id="expenseAmount" name="expenseAmount" min="0" step="0.01" required placeholder="Enter amount">
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseDate">Date</label>
+                        <input type="date" id="expenseDate" name="expenseDate" required>
+                    </div>
+                    <button type="submit" class="primary-button">Add Expense</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Global variables
+        let currentBudgetId = null;
+        let allBudgets = [];
+        let allExpenses = [];
+
+        // DOM elements
+        const createBudgetBtn = document.getElementById('createBudgetBtn');
+        const createBudgetModal = document.getElementById('createBudgetModal');
+        const editBudgetModal = document.getElementById('editBudgetModal');
+        const budgetDetailsModal = document.getElementById('budgetDetailsModal');
+        const createBudgetForm = document.getElementById('createBudgetForm');
+        const editBudgetForm = document.getElementById('editBudgetForm');
+        const budgetsList = document.getElementById('budgetsList');
+        
+        // Initialize date inputs with current date
+        document.getElementById('startDate').valueAsDate = new Date();
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1);
+        document.getElementById('endDate').valueAsDate = endDate;
+
+        // Event Listeners
+        createBudgetBtn.addEventListener('click', () => openModal('createBudgetModal'));
+        
+        createBudgetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await createBudget();
+        });
+        
+        editBudgetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await updateBudget();
+        });
+        
+        document.getElementById('editBudgetBtn').addEventListener('click', () => {
+            openEditModal(currentBudgetId);
+        });
+        
+        document.getElementById('deleteBudgetBtn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete this budget?')) {
+                await deleteBudget(currentBudgetId);
+            }
+        });
+
+        document.getElementById('addExpenseBtn').addEventListener('click', () => {
+            const budget = allBudgets.find(b => b.id === currentBudgetId);
+            if (!budget) return;
+            
+            // Set budget name in the modal title
+            document.getElementById('expenseBudgetName').textContent = budget.category;
+            
+            // Store the category in a hidden field for form submission
+            document.getElementById('expenseBudgetCategory').value = budget.category;
+            
+            // Set default date to today
+            document.getElementById('expenseDate').valueAsDate = new Date();
+            
+            // Close the budget details modal and open the add expense modal
+            closeModal('budgetDetailsModal');
+            openModal('addExpenseModal');
+        });
+        
+        document.getElementById('addExpenseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await createExpense();
+        });
+
+        // Fetch budgets and expenses when page loads
+        window.onload = async () => {
+            await fetchBudgets();
+            await fetchExpenses();
+            displayBudgets();
+        };
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if (modalId === 'budgetDetailsModal') {
+                currentBudgetId = null;
+            }
+        }
+        
+        function openEditModal(budgetId) {
+            const budget = allBudgets.find(b => b.id === budgetId);
+            if (!budget) return;
+            
+            document.getElementById('editBudgetId').value = budget.id;
+            document.getElementById('editCategory').value = budget.category;
+            document.getElementById('editAmount').value = budget.amount;
+            document.getElementById('editStartDate').value = formatDateForInput(budget.start_date);
+            document.getElementById('editEndDate').value = formatDateForInput(budget.end_date);
+            
+            closeModal('budgetDetailsModal');
+            openModal('editBudgetModal');
+        }
+
+        // API Functions
+        async function fetchBudgets() {
+            try {
+                const response = await fetch('http://localhost:5002/api/finance/budgets', {
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+                
+                const budgets = await response.json();
+                console.log('Fetched budgets:', budgets);
+                
+                // Store budgets globally for later use
+                allBudgets = budgets.map(budget => ({
+                    ...budget,
+                    id: parseInt(budget.id)  // Ensure ID is an integer
+                }));
+                
+                return budgets;
+            } catch (error) {
+                console.error('Error fetching budgets:', error);
+                return [];
+            }
+        }
+
+        async function fetchExpenses(budgetId = null) {
+            try {
+                let url = 'http://localhost:5002/api/finance/expenses';
+                
+                // If budget ID is provided, filter expenses by that budget
+                if (budgetId) {
+                    url += `?budget_id=${budgetId}`;
+                }
+                
+                console.log(`Fetching expenses from: ${url}`);
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+                
+                const expenses = await response.json();
+                console.log('Fetched expenses:', expenses);
+                
+                // Store all expenses globally if we're fetching all of them
+                if (!budgetId) {
+                    allExpenses = expenses;
+                }
+                
+                // If we're fetching for a specific budget, update the budget details view
+                if (budgetId) {
+                    updateBudgetDetailsView(budgetId, expenses);
+                }
+                
+                return expenses;
+            } catch (error) {
+                console.error('Error fetching expenses:', error);
+                return [];
+            }
+        }
+
+        async function createBudget() {
+            const category = document.getElementById('category').value;
+            const amount = document.getElementById('amount').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            // Validate dates
+            if (new Date(endDate) <= new Date(startDate)) {
+                alert('End date must be after start date');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:5002/api/finance/budgets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({
+                        category,
+                        amount,
+                        start_date: startDate,
+                        end_date: endDate
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Budget created successfully!');
+                    createBudgetForm.reset();
+                    closeModal('createBudgetModal');
+                    
+                    // Set default dates again
+                    document.getElementById('startDate').valueAsDate = new Date();
+                    const newEndDate = new Date();
+                    newEndDate.setMonth(newEndDate.getMonth() + 1);
+                    document.getElementById('endDate').valueAsDate = newEndDate;
+                    
+                    // Refresh budgets
+                    await fetchBudgets();
+                    displayBudgets();
+                } else {
+                    alert('Failed to create budget: ' + (await response.text()));
+                }
+            } catch (error) {
+                console.error('Error creating budget:', error);
+                alert('Error creating budget: ' + error.message);
+            }
+        }
+
+        async function updateBudget() {
+            const budgetId = document.getElementById('editBudgetId').value;
+            const category = document.getElementById('editCategory').value;
+            const amount = document.getElementById('editAmount').value;
+            const startDate = document.getElementById('editStartDate').value;
+            const endDate = document.getElementById('editEndDate').value;
+            
+            // Validate dates
+            if (new Date(endDate) <= new Date(startDate)) {
+                alert('End date must be after start date');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://localhost:5002/api/finance/budgets/${budgetId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({
+                        category,
+                        amount,
+                        start_date: startDate,
+                        end_date: endDate
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Budget updated successfully!');
+                    editBudgetForm.reset();
+                    closeModal('editBudgetModal');
+                    
+                    // Refresh budgets
+                    await fetchBudgets();
+                    displayBudgets();
+                } else {
+                    alert('Failed to update budget: ' + (await response.text()));
+                }
+            } catch (error) {
+                console.error('Error updating budget:', error);
+                alert('Error updating budget: ' + error.message);
+            }
+        }
+
+        async function deleteBudget(budgetId) {
+            try {
+                const response = await fetch(`http://localhost:5002/api/finance/budgets/${budgetId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Budget deleted successfully!');
+                    closeModal('budgetDetailsModal');
+                    
+                    // Refresh budgets
+                    await fetchBudgets();
+                    displayBudgets();
+                } else {
+                    alert('Failed to delete budget: ' + (await response.text()));
+                }
+            } catch (error) {
+                console.error('Error deleting budget:', error);
+                alert('Error deleting budget: ' + error.message);
+            }
+        }
+
+        async function createExpense() {
+            const description = document.getElementById('expenseDescription').value;
+            const amount = document.getElementById('expenseAmount').value;
+            const date = document.getElementById('expenseDate').value;
+            
+            // Ensure we have the current budget ID
+            if (!currentBudgetId) {
+                alert('Error: Budget ID is missing');
+                return;
+            }
+            
+            // Get the budget information to use its category
+            const budget = allBudgets.find(b => b.id === currentBudgetId);
+            if (!budget) {
+                alert('Error: Budget not found');
+                return;
+            }
+            
+            // Use the budget's category for the expense
+            const category = budget.category;
+            
+            // Validate all required fields are present
+            if (!description || !amount || !date) {
+                alert('Please fill in all required fields: Description, Amount, and Date');
+                return;
+            }
+            
+            // Validate date is within active budget range
+            const expenseDate = new Date(date);
+            const startDate = new Date(budget.start_date);
+            const endDate = new Date(budget.end_date);
+            
+            if (expenseDate < startDate || expenseDate > endDate) {
+                if (!confirm(`This expense date is outside the budget period (${new Date(budget.start_date).toLocaleDateString()} to ${new Date(budget.end_date).toLocaleDateString()}). Do you want to continue anyway?`)) {
+                    return;
+                }
+            }
+            
+            try {
+                console.log(`Adding expense to budget ID: ${currentBudgetId}`);
+                console.log('Expense data:', {
+                    description,
+                    amount,
+                    category,
+                    date,
+                    budget_id: currentBudgetId
+                });
+                
+                const response = await fetch('http://localhost:5002/api/finance/expenses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({
+                        description,
+                        amount,
+                        category,
+                        date,
+                        budget_id: currentBudgetId
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Expense added successfully!');
+                    document.getElementById('addExpenseForm').reset();
+                    closeModal('addExpenseModal');
+                    
+                    // Refresh expenses and update budget display
+                    await fetchExpenses();
+                    displayBudgets();
+                    
+                    // If we have a current budget ID, reopen the budget details
+                    if (currentBudgetId) {
+                        viewBudgetDetails(currentBudgetId);
+                    }
+                } else {
+                    const errorText = await response.text();
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        alert('Failed to add expense: ' + (errorData.error || 'Unknown error'));
+                    } catch (e) {
+                        alert('Failed to add expense: ' + errorText);
+                    }
+                }
+            } catch (error) {
+                console.error('Error adding expense:', error);
+                alert('Error adding expense: ' + error.message);
+            }
+        }
+
+        // Display Functions
+        function displayBudgets() {
+            if (allBudgets.length === 0) {
+                budgetsList.innerHTML = '<div class="no-budgets">No budgets found. Create your first budget to get started.</div>';
+                return;
+            }
+
+            let budgetsHTML = '';
+            
+            allBudgets.forEach(budget => {
+                // Calculate spent amount
+                const budgetExpenses = allExpenses.filter(expense => expense.budget_id === budget.id);
+                const spentAmount = budgetExpenses.reduce((total, expense) => total + parseFloat(expense.amount), 0);
+                const percentage = (spentAmount / parseFloat(budget.amount)) * 100;
+                
+                // Determine status class
+                let statusClass = 'good';
+                let statusText = 'On Track';
+                
+                if (percentage > 100) {
+                    statusClass = 'over-budget';
+                    statusText = 'Over Budget';
+                } else if (percentage > 80) {
+                    statusClass = 'warning';
+                    statusText = 'Approaching Limit';
+                }
+                
+                // Format dates
+                const startDate = new Date(budget.start_date).toLocaleDateString();
+                const endDate = new Date(budget.end_date).toLocaleDateString();
+                
+                budgetsHTML += `
+                    <div class="budget-card" data-id="${budget.id}">
+                        <div class="budget-header">
+                            <h3>${budget.category}</h3>
+                            <span class="budget-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="budget-amount">
+                            <span class="spent">₹${spentAmount.toFixed(2)}</span>
+                            <span class="total">of ₹${parseFloat(budget.amount).toFixed(2)}</span>
+                        </div>
+                        <div class="budget-progress">
+                            <div class="progress-bar ${statusClass}" style="width: ${Math.min(percentage, 100)}%"></div>
+                        </div>
+                        <div class="budget-dates">
+                            ${startDate} - ${endDate}
+                        </div>
+                        <div class="budget-actions">
+                            <button class="view-details-btn">View Details</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            budgetsList.innerHTML = budgetsHTML;
+            
+            // Add event listeners to view details buttons
+            document.querySelectorAll('.view-details-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const budgetCard = e.target.closest('.budget-card');
+                    const budgetId = parseInt(budgetCard.dataset.id);
+                    viewBudgetDetails(budgetId);
+                });
+            });
+            
+            // Make entire budget card clickable
+            document.querySelectorAll('.budget-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Ignore clicks on buttons
+                    if (e.target.tagName === 'BUTTON') return;
+                    
+                    const budgetId = parseInt(card.dataset.id);
+                    viewBudgetDetails(budgetId);
+                });
+            });
+        }
+        
+        function viewBudgetDetails(budgetId) {
+            currentBudgetId = budgetId;
+            const budget = allBudgets.find(b => b.id === budgetId);
+            if (!budget) return;
+            
+            // Calculate budget status
+            const { spent, remaining, percentUsed, daysLeft } = calculateBudgetStatus(budget);
+            
+            // Get list of expenses for this budget category
+            const categoryExpenses = allExpenses.filter(e => e.category === budget.category);
+            
+            // Format dates
+            const startDate = new Date(budget.start_date).toLocaleDateString();
+            const endDate = new Date(budget.end_date).toLocaleDateString();
+            
+            // Build details HTML
+            const detailsContent = document.getElementById('budgetDetails');
+            document.getElementById('detailsTitle').textContent = `${budget.category} Budget Details`;
+            
+            detailsContent.innerHTML = `
+                <div class="budget-summary">
+                    <div class="budget-summary-item">
+                        <span class="label">Budget Amount:</span>
+                        <span class="value">₹${parseFloat(budget.amount).toFixed(2)}</span>
+                    </div>
+                    <div class="budget-summary-item">
+                        <span class="label">Period:</span>
+                        <span class="value">${startDate} to ${endDate}</span>
+                    </div>
+                    <div class="budget-summary-item">
+                        <span class="label">Days Remaining:</span>
+                        <span class="value">${daysLeft} days</span>
+                    </div>
+                    <div class="budget-summary-item">
+                        <span class="label">Amount Spent:</span>
+                        <span class="value">₹${spent.toFixed(2)}</span>
+                    </div>
+                    <div class="budget-summary-item">
+                        <span class="label">Remaining Balance:</span>
+                        <span class="value${remaining < 0 ? ' negative-balance' : ''}">₹${remaining.toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                <div class="progress-container detail-progress">
+                    <div class="progress-text">${percentUsed}% Used</div>
+                    <div class="progress-bar${percentUsed > 100 ? ' over-budget' : ''}" style="width: ${Math.min(100, percentUsed)}%"></div>
+                </div>
+                
+                <div class="category-expenses">
+                    <div class="expenses-header">
+                        <h3>Expenses in this Category</h3>
+                        <div class="expense-count">${categoryExpenses.length} expense${categoryExpenses.length !== 1 ? 's' : ''}</div>
+                    </div>
+                    
+                    ${categoryExpenses.length > 0 
+                        ? `<div class="expenses-list">
+                            ${categoryExpenses.map(expense => `
+                                <div class="expense-item">
+                                    <div class="expense-category ${expense.category.toLowerCase()}">${expense.category}</div>
+                                    <div class="expense-details">
+                                        <div class="expense-description">${expense.description}</div>
+                                        <div class="expense-date">${new Date(expense.date).toLocaleDateString()}</div>
+                                    </div>
+                                    <div class="expense-actions">
+                                        <div class="expense-amount">₹${parseFloat(expense.amount).toFixed(2)}</div>
+                                        <button class="delete-expense-btn" onclick="deleteExpense(${expense.id})">Delete</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                           </div>`
+                        : `<div class="no-expenses-message">
+                              <p>No expenses recorded in this category yet.</p>
+                              <p class="add-expense-prompt">Click the "Add Expense" button below to start tracking your spending in this budget.</p>
+                           </div>`
+                    }
+                </div>
+            `;
+            
+            openModal('budgetDetailsModal');
+        }
+        
+        // Utility Functions
+        function calculateBudgetStatus(budget) {
+            const today = new Date();
+            const startDate = new Date(budget.start_date);
+            const endDate = new Date(budget.end_date);
+            
+            // Calculate days left
+            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const daysElapsed = Math.max(0, Math.ceil((today - startDate) / (1000 * 60 * 60 * 24)));
+            const daysLeft = Math.max(0, totalDays - daysElapsed);
+            
+            // Calculate spent amount (sum of expenses in this category)
+            const categoryExpenses = allExpenses.filter(e => e.category === budget.category);
+            const spent = categoryExpenses.reduce((sum, expense) => {
+                // Only count expenses that fall within the budget period
+                const expenseDate = new Date(expense.date);
+                if (expenseDate >= startDate && expenseDate <= endDate) {
+                    return sum + parseFloat(expense.amount);
+                }
+                return sum;
+            }, 0);
+            
+            // Calculate remaining amount (can be negative if over budget)
+            const remaining = parseFloat(budget.amount) - spent;
+            
+            // Calculate percentage used
+            const percentUsed = Math.round((spent / parseFloat(budget.amount)) * 100);
+            
+            return { spent, remaining, percentUsed, daysLeft };
+        }
+        
+        function formatDateForInput(dateString) {
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0];
+        }
+
+        // View budget details
+        async function viewBudgetDetails(budgetId) {
+            try {
+                // Close any open forms first
+                closeModal('createBudgetModal');
+                closeModal('editBudgetModal');
+                
+                currentBudgetId = budgetId;
+                console.log(`Viewing budget details for budget ID: ${currentBudgetId}`);
+                
+                const budget = allBudgets.find(b => b.id === budgetId);
+                if (!budget) {
+                    console.error('Budget not found:', budgetId);
+                    return;
+                }
+                
+                // Update the header with budget details
+                const budgetHeader = document.getElementById('selectedBudgetDetails');
+                budgetHeader.innerHTML = `
+                    <h3>${budget.category} Budget</h3>
+                    <p>₹${parseFloat(budget.amount).toFixed(2)} from ${new Date(budget.start_date).toLocaleDateString()} to ${new Date(budget.end_date).toLocaleDateString()}</p>
+                `;
+                
+                // Load expenses for this budget
+                await fetchExpenses(budgetId);
+                
+                // Show the details section and hide main budget list
+                document.getElementById('budgetList').style.display = 'none';
+                document.getElementById('budgetDetails').style.display = 'block';
+                document.getElementById('createBudgetBtn').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error viewing budget details:', error);
+                alert('Failed to load budget details. Please try again.');
+            }
+        }
+
+        // Update the budget details view with fetched expenses
+        function updateBudgetDetailsView(budgetId, expenses) {
+            const expensesList = document.getElementById('budgetExpensesList');
+            
+            if (expenses.length === 0) {
+                expensesList.innerHTML = '<p class="no-expenses">No expenses found for this budget.</p>';
+                return;
+            }
+            
+            let html = '<div class="expense-list">';
+            
+            expenses.forEach(expense => {
+                const date = new Date(expense.date).toLocaleDateString();
+                
+                html += `
+                    <div class="expense-item">
+                        <div class="expense-category ${expense.category.toLowerCase()}">${expense.category}</div>
+                        <div class="expense-details">
+                            <div class="expense-description">${expense.description}</div>
+                            <div class="expense-date">${date}</div>
+                        </div>
+                        <div class="expense-actions">
+                            <div class="expense-amount">₹${parseFloat(expense.amount).toFixed(2)}</div>
+                            <button class="delete-expense-btn" onclick="deleteExpense(${expense.id})">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            expensesList.innerHTML = html;
+            
+            // Update the total spent
+            const totalSpent = expenses.reduce((total, expense) => total + parseFloat(expense.amount), 0);
+            document.getElementById('budgetTotalSpent').textContent = `₹${totalSpent.toFixed(2)}`;
+            
+            // Find the budget and calculate percentage
+            const budget = allBudgets.find(b => b.id === budgetId);
+            if (budget) {
+                const percentage = (totalSpent / parseFloat(budget.amount)) * 100;
+                const percentageElement = document.getElementById('budgetPercentage');
+                percentageElement.textContent = `${percentage.toFixed(0)}%`;
+                
+                // Update the progress bar
+                const progressBar = document.getElementById('budgetProgressBar');
+                progressBar.style.width = `${Math.min(percentage, 100)}%`;
+                progressBar.className = 'progress-bar'; // Reset classes
+                
+                // Change color based on percentage
+                if (percentage > 100) {
+                    progressBar.classList.add('over-budget');
+                } else if (percentage > 80) {
+                    progressBar.classList.add('warning');
+                } else {
+                    progressBar.classList.add('good');
+                }
+            }
+        }
+
+        // Function to go back to budget list
+        function backToBudgetList() {
+            document.getElementById('budgetList').style.display = 'block';
+            document.getElementById('budgetDetails').style.display = 'none';
+            document.getElementById('createBudgetBtn').style.display = 'block';
+            currentBudgetId = null;
+        }
+        
+        // Function to open edit budget modal
+        function openEditBudget() {
+            openEditModal(currentBudgetId);
+        }
+        
+        // Function to confirm and delete budget
+        function confirmDeleteBudget() {
+            if (confirm('Are you sure you want to delete this budget? This will unlink all associated expenses.')) {
+                deleteBudget(currentBudgetId);
+            }
+        }
+
+        // Delete expense
+        async function deleteExpense(expenseId) {
+            if (!confirm('Are you sure you want to delete this expense?')) {
+                return;
+            }
+            
+            try {
+                console.log(`Deleting expense ID: ${expenseId}`);
+                
+                const response = await fetch(`http://localhost:5002/api/finance/expenses/${expenseId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Expense deleted successfully');
+                    
+                    // Refresh expenses and update budget display
+                    await fetchExpenses();
+                    displayBudgets();
+                    
+                    // If we have a current budget ID, reopen the budget details
+                    if (currentBudgetId) {
+                        viewBudgetDetails(currentBudgetId);
+                    }
+                } else {
+                    const errorText = await response.text();
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        alert(`Failed to delete expense: ${errorData.error || 'Unknown error'}`);
+                    } catch (e) {
+                        alert(`Failed to delete expense: ${errorText || response.status}`);
+                    }
+                }
+            } catch (error) {
+                console.error('Error deleting expense:', error);
+                alert(`Error deleting expense: ${error.message}`);
+            }
+        }
+
+        // Load budgets when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchBudgets();
+            addNavbar('budgets');
+            addFooter();
+        });
+    </script>
+</body>
+</html> 

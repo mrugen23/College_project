@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Personal Finance Tracker</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="logo-container">
+                <img src="wealth.png" alt="Finance Tracker Logo" class="logo">
+            </div>
+            <h1>Create Your Account</h1>
+            <p class="auth-subtitle">Join thousands of users managing their finances with ease</p>
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a secure password" required minlength="6">
+                    <small class="form-hint">Use at least 6 characters with a mix of letters, numbers and symbols</small>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Repeat your password" required>
+                </div>
+                <button type="submit" class="primary-button register-btn w-full">
+                    <span class="btn-text">Create Account</span>
+                    <span class="btn-loader" style="display: none;">
+                        <div class="loading-spinner"></div>
+                    </span>
+                </button>
+            </form>
+            <p class="register-link">Already have an account? <a href="login.html">Sign in</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            const button = document.querySelector('.register-btn');
+            const buttonText = document.querySelector('.btn-text');
+            const buttonLoader = document.querySelector('.btn-loader');
+            
+            // Disable button and show loader
+            button.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoader.style.display = 'block';
+
+            try {
+                const response = await fetch('http://localhost:5002/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Your account has been created successfully! Please sign in.');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.error || 'Registration failed. Please try again.');
+                    
+                    // Reset button
+                    button.disabled = false;
+                    buttonText.style.display = 'block';
+                    buttonLoader.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred during registration. Please check your connection and try again.');
+                
+                // Reset button
+                button.disabled = false;
+                buttonText.style.display = 'block';
+                buttonLoader.style.display = 'none';
+            }
+        });
+        
+        // Real-time password confirmation validator
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (password !== confirmPassword) {
+                this.setCustomValidity('Passwords do not match');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+        
+        // Add password strength feedback
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const hint = document.querySelector('.form-hint');
+            
+            if (password.length < 6) {
+                hint.style.color = 'var(--danger-color)';
+            } else if (password.length < 8) {
+                hint.style.color = 'var(--warning-color)';
+            } else {
+                hint.style.color = 'var(--success-color)';
+            }
+        });
+    </script>
+</body>
+</html> 

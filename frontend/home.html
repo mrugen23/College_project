@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Tracker</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="home.css">
+    <script src="navbar.js"></script>
+    <script src="footer.js"></script>
+</head>
+<body>
+    <!-- This div will contain the navbar -->
+    <div id="navbar-container"></div>
+    
+    <div class="container">
+        <div class="welcome-section">
+            <h1>Dashboard</h1>
+            <p class="welcome-text">Welcome to your personal finance tracker. Manage your finances with ease.</p>
+        </div>
+        
+        <div class="dashboard">
+            <div class="summary-card">
+                <div class="card-icon budget-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-3.5-6H14a.5.5 0 1 0 0-1h-4a2.5 2.5 0 1 1 0-5h1V6h2v2h2.5v2H10a.5.5 0 1 0 0 1h4a2.5 2.5 0 1 1 0 5h-1v2h-2v-2H8.5v-2z" fill="currentColor"/></svg>
+                </div>
+                <h3>Total Budget</h3>
+                <p class="summary-value" id="totalBudget">₹0.00</p>
+            </div>
+            <div class="summary-card">
+                <div class="card-icon expense-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z" fill="currentColor"/></svg>
+                </div>
+                <h3>Total Expenses</h3>
+                <p class="summary-value" id="totalExpenses">₹0.00</p>
+            </div>
+            <div class="summary-card" id="balanceCard">
+                <div class="card-icon balance-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M22 7h1v10h-1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v3zm-2 10h-6a5 5 0 0 1 0-10h6V5H4v14h16v-2zm1-2V9h-7a3 3 0 0 0 0 6h7zm-7-4h3v2h-3v-2z" fill="currentColor"/></svg>
+                </div>
+                <h3>Balance</h3>
+                <p class="summary-value" id="balance">₹0.00</p>
+            </div>
+        </div>
+
+        <h2 class="section-title">Main Features</h2>
+        <div class="features">
+            <div class="feature-card" onclick="window.location.href='budgets.html'">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40"><path fill="none" d="M0 0h24v24H0z"/><path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 8H4v8h16v-8zm0-2V5H4v4h16zm-6 6h4v2h-4v-2z" fill="currentColor"/></svg>
+                </div>
+                <h3>Manage Budgets</h3>
+                <p>Create and track your budgets by category</p>
+                <a href="budgets.html" class="feature-link">Go to Budgets</a>
+            </div>
+            <div class="feature-card" onclick="window.location.href='expenses.html'">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40"><path fill="none" d="M0 0h24v24H0z"/><path d="M5 8h14V5H5v3zm0 10h14v-3H5v3zm0-5h14v-2H5v2zm0-2h14V9H5v2zM4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" fill="currentColor"/></svg>
+                </div>
+                <h3>Track Expenses</h3>
+                <p>Record and categorize all your expenses</p>
+                <a href="expenses.html" class="feature-link">Go to Expenses</a>
+            </div>
+            <div class="feature-card" onclick="window.location.href='groups.html'">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 11a5 5 0 0 1 5 5v6h-2v-6a3 3 0 0 0-2.824-2.995L12 13a3 3 0 0 0-2.995 2.824L9 16v6H7v-6a5 5 0 0 1 5-5zm-6.5 3c.279 0 .55.033.81.094a5.947 5.947 0 0 0-.301 1.575L6 16v.086a1.492 1.492 0 0 0-.356-.08L5.5 16a1.5 1.5 0 0 0-1.493 1.356L4 17.5V22H2v-4.5A3.5 3.5 0 0 1 5.5 14zm13 0a3.5 3.5 0 0 1 3.5 3.5V22h-2v-4.5a1.5 1.5 0 0 0-1.356-1.493L18.5 16c-.175 0-.343.03-.5.085V16c0-.666-.108-1.306-.309-1.904.259-.063.53-.096.809-.096zm-13-6a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zm13 0a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zm-13 2a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1zm13 0a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1zM12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" fill="currentColor"/></svg>
+                </div>
+                <h3>Group Expenses</h3>
+                <p>Split expenses with friends and family</p>
+                <a href="groups.html" class="feature-link">Go to Groups</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add navbar with 'home' as active link
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM content loaded, initializing dashboard...');
+            addNavbar('home');
+            addFooter();
+            // Call fetchDashboardData after a short timeout to ensure DOM is fully loaded
+            setTimeout(fetchDashboardData, 100);
+        });
+
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Fetch dashboard data
+        async function fetchDashboardData() {
+            try {
+                console.log('Fetching dashboard data...');
+                
+                // Get the DOM elements once to avoid repeatedly querying
+                const totalBudgetElement = document.getElementById('totalBudget');
+                const totalExpensesElement = document.getElementById('totalExpenses');
+                const balanceElement = document.getElementById('balance');
+                const balanceCard = document.getElementById('balanceCard');
+
+                // Initialize values with defaults
+                let totalBudget = 0;
+                let totalExpenses = 0;
+
+                // Fetch budgets
+                try {
+                    const budgetResponse = await fetch('http://localhost:5002/api/finance/budgets', {
+                        headers: {
+                            'Authorization': token
+                        },
+                        cache: 'no-store'
+                    });
+                    
+                    if (budgetResponse.ok) {
+                        const budgets = await budgetResponse.json();
+                        console.log(`Loaded ${budgets.length} budgets`);
+                        
+                        // Calculate total budget
+                        totalBudget = budgets.reduce((sum, budget) => sum + parseFloat(budget.amount), 0);
+                        totalBudgetElement.textContent = `₹${totalBudget.toFixed(2)}`;
+                    } else {
+                        console.error(`Budget API error: ${budgetResponse.status}`);
+                        totalBudgetElement.textContent = 'Error loading data';
+                    }
+                } catch (budgetError) {
+                    console.error('Error fetching budgets:', budgetError);
+                    totalBudgetElement.textContent = 'Error loading data';
+                }
+
+                // Fetch expenses
+                try {
+                    const expenseResponse = await fetch('http://localhost:5002/api/finance/expenses', {
+                        headers: {
+                            'Authorization': token
+                        },
+                        cache: 'no-store'
+                    });
+                    
+                    if (expenseResponse.ok) {
+                        const expenses = await expenseResponse.json();
+                        console.log(`Loaded ${expenses.length} expenses`);
+                        
+                        // Calculate total expenses
+                        totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+                        totalExpensesElement.textContent = `₹${totalExpenses.toFixed(2)}`;
+                    } else {
+                        console.error(`Expense API error: ${expenseResponse.status}`);
+                        totalExpensesElement.textContent = 'Error loading data';
+                    }
+                } catch (expenseError) {
+                    console.error('Error fetching expenses:', expenseError);
+                    totalExpensesElement.textContent = 'Error loading data';
+                }
+
+                // Calculate and display balance
+                const balance = totalBudget - totalExpenses;
+                balanceElement.textContent = `₹${balance.toFixed(2)}`;
+                
+                // Add class based on balance
+                balanceElement.className = 'summary-value'; // Reset classes
+                if (balance < 0) {
+                    balanceElement.classList.add('negative-balance');
+                    balanceCard.classList.add('negative-card');
+                } else {
+                    balanceElement.classList.add('positive-balance');
+                }
+                
+                console.log('Dashboard data loaded successfully');
+            } catch (error) {
+                console.error('Error in dashboard data flow:', error);
+            }
+        }
+    </script>
+</body>
+</html>

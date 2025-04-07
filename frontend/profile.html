@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Personal Finance Tracker</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="profile.css">
+    <script src="navbar.js"></script>
+    <script src="footer.js"></script>
+</head>
+<body>
+    <!-- This div will contain the navbar -->
+    <div id="navbar-container"></div>
+    
+    <div class="container">
+        <header>
+            <a href="home.html" class="back-button">← Back to Home</a>
+            <div class="logo">
+                <img src="wealth.png" alt="logo">
+            </div>
+        </header>
+
+        <main class="profile-container">
+            <div class="profile-header">
+                <div class="profile-image">
+                    <img id="profileImage" src="profile.jpg" alt="Profile Picture">
+                    <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                    <button id="changePhotoBtn" class="change-photo-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="none" d="M0 0h24v24H0z"/><path d="M9.828 5l-2 2H4v12h16V7h-3.828l-2-2H9.828zM9 3h6l2 2h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4l2-2zm.5 7a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm0 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" fill="currentColor"/></svg>
+                        Change Photo
+                    </button>
+                </div>
+                <h1>Your Profile</h1>
+                <button id="logoutBtn" class="logout-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="none" d="M0 0h24v24H0z"/><path d="M5 22a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5zm10-6l5-4-5-4v3H9v2h6v3z" fill="currentColor"/></svg>
+                    Logout
+                </button>
+            </div>
+
+            <div class="profile-tabs">
+                <button class="tab-btn active" data-tab="personal-info">Personal Info</button>
+                <button class="tab-btn" data-tab="account-stats">Account Statistics</button>
+                <button class="tab-btn" data-tab="settings">Settings</button>
+            </div>
+
+            <div class="tab-content active" id="personal-info">
+                <form id="profileForm" class="profile-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" readonly>
+                    </div>
+                    <h3 class="section-title">Change Password</h3>
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" name="currentPassword">
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" name="newPassword" minlength="6">
+                        <small class="form-hint">Password must be at least 6 characters long</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword">
+                    </div>
+                    <button type="submit" class="primary-button update-btn">Update Password</button>
+                </form>
+            </div>
+
+            <div class="tab-content" id="account-stats">
+                <h2>Account Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon budget-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-3.5-6H14a.5.5 0 1 0 0-1h-4a2.5 2.5 0 1 1 0-5h1V6h2v2h2.5v2H10a.5.5 0 1 0 0 1h4a2.5 2.5 0 1 1 0 5h-1v2h-2v-2H8.5v-2z" fill="currentColor"/></svg>
+                        </div>
+                        <h3>Total Budget</h3>
+                        <p id="totalBudget" class="stat-value">₹0.00</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon expense-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z" fill="currentColor"/></svg>
+                        </div>
+                        <h3>Total Expenses</h3>
+                        <p id="totalExpenses" class="stat-value">₹0.00</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon group-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 11a5 5 0 0 1 5 5v6h-2v-6a3 3 0 0 0-2.824-2.995L12 13a3 3 0 0 0-2.995 2.824L9 16v6H7v-6a5 5 0 0 1 5-5zm-6.5 3c.279 0 .55.033.81.094a5.947 5.947 0 0 0-.301 1.575L6 16v.086a1.492 1.492 0 0 0-.356-.08L5.5 16a1.5 1.5 0 0 0-1.493 1.356L4 17.5V22H2v-4.5A3.5 3.5 0 0 1 5.5 14zm13 0a3.5 3.5 0 0 1 3.5 3.5V22h-2v-4.5a1.5 1.5 0 0 0-1.356-1.493L18.5 16c-.175 0-.343.03-.5.085V16c0-.666-.108-1.306-.309-1.904.259-.063.53-.096.809-.096zm-13-6a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zm13 0a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zm-13 2a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1zm13 0a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1zM12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" fill="currentColor"/></svg>
+                        </div>
+                        <h3>Active Groups</h3>
+                        <p id="activeGroups" class="stat-value">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="settings">
+                <h2>Account Settings</h2>
+                <div class="settings-options">
+                    <div class="setting-option">
+                        <div class="setting-info">
+                            <h3>Email Notifications</h3>
+                            <p>Receive email updates about your finance activities</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-option">
+                        <div class="setting-info">
+                            <h3>Dark Mode</h3>
+                            <p>Switch between light and dark theme</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="danger-zone">
+                        <h3>Danger Zone</h3>
+                        <button id="deleteAccountBtn" class="danger-button">Delete Account</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // Add navbar with 'profile' as active link
+        window.addEventListener('DOMContentLoaded', () => {
+            addNavbar('profile');
+            addFooter();
+        });
+
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Initialize tabs
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+                
+                // Remove active class from all tabs
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                button.classList.add('active');
+                document.getElementById(tab).classList.add('active');
+            });
+        });
+
+        // Fetch user profile data
+        async function fetchProfileData() {
+            try {
+                // Show loading indicators
+                document.getElementById('totalBudget').innerHTML = '<div class="loading-spinner"></div>';
+                document.getElementById('totalExpenses').innerHTML = '<div class="loading-spinner"></div>';
+                document.getElementById('activeGroups').innerHTML = '<div class="loading-spinner"></div>';
+                
+                const response = await fetch('http://localhost:5002/api/auth/profile', {
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch profile: ${response.status}`);
+                }
+                
+                const userData = await response.json();
+                
+                // Update profile fields
+                document.getElementById('username').value = userData.username;
+                document.getElementById('email').value = userData.email;
+                
+                // Update profile image if available
+                if (userData.profile_photo) {
+                    document.getElementById('profileImage').src = userData.profile_photo;
+                }
+
+                // Fetch statistics
+                try {
+                    const budgetsResponse = await fetch('http://localhost:5002/api/finance/budgets', {
+                        headers: { 'Authorization': token }
+                    });
+                    
+                    if (budgetsResponse.ok) {
+                        const budgets = await budgetsResponse.json();
+                        const totalBudget = budgets.reduce((sum, budget) => sum + parseFloat(budget.amount), 0);
+                        document.getElementById('totalBudget').textContent = `₹${totalBudget.toFixed(2)}`;
+                    } else {
+                        document.getElementById('totalBudget').textContent = 'N/A';
+                    }
+                } catch (error) {
+                    document.getElementById('totalBudget').textContent = 'N/A';
+                    console.error('Error fetching budgets:', error);
+                }
+
+                try {
+                    const expensesResponse = await fetch('http://localhost:5002/api/finance/expenses', {
+                        headers: { 'Authorization': token }
+                    });
+                    
+                    if (expensesResponse.ok) {
+                        const expenses = await expensesResponse.json();
+                        const totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+                        document.getElementById('totalExpenses').textContent = `₹${totalExpenses.toFixed(2)}`;
+                    } else {
+                        document.getElementById('totalExpenses').textContent = 'N/A';
+                    }
+                } catch (error) {
+                    document.getElementById('totalExpenses').textContent = 'N/A';
+                    console.error('Error fetching expenses:', error);
+                }
+
+                try {
+                    const groupsResponse = await fetch('http://localhost:5002/api/groups/', {
+                        headers: { 'Authorization': token }
+                    });
+                    
+                    if (groupsResponse.ok) {
+                        const groups = await groupsResponse.json();
+                        document.getElementById('activeGroups').textContent = groups.length;
+                    } else {
+                        document.getElementById('activeGroups').textContent = 'N/A';
+                    }
+                } catch (error) {
+                    document.getElementById('activeGroups').textContent = 'N/A';
+                    console.error('Error fetching groups:', error);
+                }
+
+            } catch (error) {
+                console.error('Error fetching profile data:', error);
+            }
+        }
+
+        // Handle password update
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                alert('New passwords do not match');
+                return;
+            }
+            
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = 'Updating...';
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5002/api/auth/update-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+
+                if (response.ok) {
+                    alert('Password updated successfully');
+                    document.getElementById('profileForm').reset();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to update password');
+                }
+            } catch (error) {
+                console.error('Error updating password:', error);
+                alert('Failed to update password');
+            } finally {
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }
+        });
+
+        // Add password confirmation validator
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('newPassword').value;
+            const confirmPassword = this.value;
+            
+            if (password !== confirmPassword) {
+                this.setCustomValidity('Passwords do not match');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Handle photo change
+        document.getElementById('changePhotoBtn').addEventListener('click', () => {
+            // Trigger the hidden file input
+            document.getElementById('photoInput').click();
+        });
+        
+        // Handle photo upload when a file is selected
+        document.getElementById('photoInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Check file type and size
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+            if (!validTypes.includes(file.type)) {
+                alert('Please select a valid image file (JPEG, PNG, or GIF)');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                alert('File size should be less than 5MB');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('photo', file);
+            
+            try {
+                const response = await fetch('http://localhost:5002/api/auth/upload-photo', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': token
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Update profile image with the new photo
+                    document.getElementById('profileImage').src = result.photo_url;
+                    alert('Profile photo updated successfully');
+                } else {
+                    alert(result.error || 'Failed to upload photo');
+                }
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                alert('Error uploading photo. Please try again.');
+            }
+        });
+
+        // Handle logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Handle account deletion
+        document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                try {
+                    const response = await fetch('http://localhost:5002/api/auth/delete-account', {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': token
+                        }
+                    });
+
+                    if (response.ok) {
+                        localStorage.removeItem('token');
+                        window.location.href = 'login.html';
+                        alert('Your account has been deleted');
+                    } else {
+                        const data = await response.json();
+                        alert(data.error || 'Failed to delete account');
+                    }
+                } catch (error) {
+                    console.error('Error deleting account:', error);
+                    alert('Failed to delete account');
+                }
+            }
+        });
+
+        // Load profile data when page loads
+        window.onload = fetchProfileData;
+    </script>
+</body>
+</html>

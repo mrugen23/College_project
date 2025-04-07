@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Expenses - Personal Finance Tracker</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="groups.css">
+    <script src="navbar.js"></script>
+    <script src="footer.js"></script>
+</head>
+<body>
+    <!-- This div will contain the navbar -->
+    <div id="navbar-container"></div>
+    
+    <div class="container">
+        <header>
+            <a href="home.html" class="back-button">← Back to Home</a>
+            <div class="logo">
+                <img src="wealth.png" alt="logo">
+            </div>
+        </header>
+
+        <main>
+            <div class="create-group-section">
+                <h2>Create New Group</h2>
+                <form id="createGroupForm">
+                    <div class="form-group">
+                        <label for="groupName">Group Name</label>
+                        <input type="text" id="groupName" name="groupName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="members">Members (Names, comma-separated)</label>
+                        <input type="text" id="members" name="members" placeholder="John, Sarah, Mike" required>
+                    </div>
+                    <button type="submit">Create Group</button>
+                </form>
+            </div>
+
+            <div class="groups-list">
+                <h2>Your Groups</h2>
+                <div id="groupsList"></div>
+            </div>
+        </main>
+
+        <!-- Group Details Modal -->
+        <div id="groupDetailsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal('groupDetailsModal')">&times;</span>
+                
+                <div class="modal-header">
+                    <h2 id="groupDetailsTitle">Group Details</h2>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" onclick="openTab('membersTab')">Members</div>
+                    <div class="tab" onclick="openTab('expensesTab')">Expenses</div>
+                    <div class="tab" onclick="openTab('balancesTab')">Balances</div>
+                    <div class="tab" onclick="openTab('addExpenseTab')">Add Expense</div>
+                </div>
+                
+                <!-- Members Tab -->
+                <div id="membersTab" class="tab-content active">
+                    <div id="membersList" class="members-list">
+                        <!-- Members will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- Expenses Tab -->
+                <div id="expensesTab" class="tab-content">
+                    <div id="expensesList" class="expenses-list">
+                        <!-- Expenses will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- Balances Tab -->
+                <div id="balancesTab" class="tab-content">
+                    <div id="balancesList" class="balances-list">
+                        <!-- Balances will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- Add Expense Tab -->
+                <div id="addExpenseTab" class="tab-content">
+                    <form id="addExpenseForm">
+                        <div class="form-group">
+                            <label for="expenseTitle">Title</label>
+                            <input type="text" id="expenseTitle" required placeholder="Dinner, Movies, etc.">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="expenseAmount">Amount (₹)</label>
+                            <input type="number" id="expenseAmount" required min="0" step="0.01" placeholder="Amount">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paidBy">Paid By</label>
+                            <select id="paidBy" required>
+                                <!-- Members will be populated here -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="splitType">Split Type</label>
+                            <select id="splitType" onchange="updateSplitOptions()">
+                                <option value="equal">Equal</option>
+                                <option value="unequal">Unequal</option>
+                            </select>
+                        </div>
+                        
+                        <div id="splitOptions" class="split-options-container">
+                            <!-- Split options will be populated here -->
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="expenseDate">Date</label>
+                            <input type="date" id="expenseDate" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="expenseNotes">Notes (Optional)</label>
+                            <textarea id="expenseNotes" rows="3" placeholder="Additional details..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="primary-button">Add Expense</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        const token = localStorage.getItem('token');
+        let currentGroupId = null;
+        let currentGroupMembers = [];
+        let currentUserId = null;
+
+        // Check if user is logged in
+        if (!token) {
+            window.location.href = 'login.html';
+        } else {
+            // Extract user ID from JWT token
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                currentUserId = payload.user_id;
+            } catch (e) {
+                console.error('Error parsing token:', e);
+            }
+        }
+
+        // Fetch and display groups
+        async function fetchGroups() {
+            try {
+                console.log('Fetching groups with token:', token ? 'Token present' : 'No token');
+                
+                // Show loading state
+                document.getElementById('groupsList').innerHTML = '<p>Loading groups...</p>';
+                
+                const response = await fetch('http://localhost:5002/api/groups/', {
+                    headers: {
+                        'Authorization': token
+                    },
+                    // Add cache-busting query parameter
+                    cache: 'no-store'
+                });
+                
+                console.log('Groups API response status:', response.status);
+                
+                const responseText = await response.text();
+                console.log('Groups API response text:', responseText);
+                
+                if (response.ok) {
+                    try {
+                        const groups = JSON.parse(responseText);
+                        console.log('Groups fetched successfully:', groups);
+                        displayGroups(groups);
+                    } catch (parseError) {
+                        console.error('Error parsing groups JSON:', parseError);
+                        document.getElementById('groupsList').innerHTML = 
+                            `<p class="error">Error parsing groups data: ${parseError.message}</p>`;
+                    }
+                } else {
+                    console.error('Error fetching groups:', response.status, responseText);
+                    document.getElementById('groupsList').innerHTML = 
+                        `<p class="error">Error loading groups: ${response.status}</p>`;
+                }
+            } catch (error) {
+                console.error('Error fetching groups:', error);
+                document.getElementById('groupsList').innerHTML = 
+                    `<p class="error">Failed to load groups: ${error.message}</p>`;
+            }
+        }
+
+        // Load groups when page loads and ensure we re-fetch on page reload
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM fully loaded, initializing page...');
+            addNavbar('groups');
+            addFooter();
+            fetchGroups();
+        });
+
+        // Display groups in the list
+        function displayGroups(groups) {
+            const groupsList = document.getElementById('groupsList');
+            groupsList.innerHTML = '';
+
+            if (groups.length === 0) {
+                groupsList.innerHTML = '<p>No groups found. Create one to get started!</p>';
+                return;
+            }
+
+            groups.forEach(group => {
+                const groupElement = document.createElement('div');
+                groupElement.className = 'group-item';
+                groupElement.innerHTML = `
+                    <div class="group-info">
+                        <h3>${group.name}</h3>
+                        <p>Friends: ${group.member_count || '0'}</p>
+                        <p>Total Expenses: ₹${group.total_expenses || '0.00'}</p>
+                    </div>
+                    <div class="group-actions">
+                        <button onclick="viewGroupDetails(${group.id})">View Details</button>
+                        <button onclick="deleteGroup(${group.id})">Delete Group</button>
+                    </div>
+                `;
+                groupsList.appendChild(groupElement);
+            });
+        }
+
+        // Create new group
+        document.getElementById('createGroupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('groupName').value;
+            const members = document.getElementById('members').value
+                .split(',')
+                .map(email => email.trim())
+                .filter(email => email);
+
+            try {
+                console.log('Creating group with:', { name, members });
+                
+                const response = await fetch('http://localhost:5002/api/groups/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({ name, members })
+                });
+
+                const responseText = await response.text();
+                console.log('Response:', response.status, responseText);
+
+                if (response.ok) {
+                    alert('Group created successfully!');
+                    document.getElementById('createGroupForm').reset();
+                    fetchGroups();
+                } else {
+                    try {
+                        const data = JSON.parse(responseText);
+                        alert(`Failed to create group: ${data.error || 'Unknown error'}`);
+                    } catch (e) {
+                        alert(`Failed to create group: ${responseText || response.status}`);
+                    }
+                }
+            } catch (error) {
+                console.error('Error creating group:', error);
+                alert(`Failed to create group: ${error.message}`);
+            }
+        });
+
+        // Open Group Details Modal
+        async function viewGroupDetails(groupId) {
+            currentGroupId = groupId;
+            
+            try {
+                console.log(`Fetching group details for group: ${groupId}`);
+                
+                // Show the modal early so UI doesn't freeze
+                const modal = document.getElementById('groupDetailsModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                }
+                
+                // Initially set a loading state
+                const titleElement = document.getElementById('groupDetailsTitle');
+                if (titleElement) {
+                    titleElement.textContent = 'Loading group details...';
+                }
+                
+                // Clear previous content in tabs
+                document.getElementById('membersList').innerHTML = '<p>Loading members...</p>';
+                document.getElementById('expensesList').innerHTML = '<p>Loading expenses...</p>';
+                document.getElementById('balancesList').innerHTML = '<p>Loading balances...</p>';
+                
+                // Show the members tab by default until data loads
+                openTab('membersTab');
+                
+                // Fetch group details with proper error handling
+                const detailsResponse = await fetch(`http://localhost:5002/api/groups/${groupId}`, {
+                    headers: { 'Authorization': token },
+                    cache: 'no-store' // Prevent caching
+                });
+                
+                console.log(`Group details response status: ${detailsResponse.status}`);
+                
+                const responseText = await detailsResponse.text();
+                console.log(`Response text: ${responseText}`);
+                
+                if (detailsResponse.ok) {
+                    try {
+                        const groupDetails = JSON.parse(responseText);
+                        console.log('Parsed group details:', groupDetails);
+                        
+                        // Update UI with group details
+                        if (titleElement) {
+                            titleElement.textContent = groupDetails.name || 'Group Details';
+                        }
+                        
+                        // Store members safely
+                        currentGroupMembers = Array.isArray(groupDetails.members) ? groupDetails.members : [];
+                        console.log(`Loaded ${currentGroupMembers.length} group members:`, currentGroupMembers);
+                        
+                        // Display members in the members tab
+                        displayGroupMembers(currentGroupMembers);
+                        
+                        // Fetch the other data in sequence
+                        try {
+                            await fetchGroupExpenses(groupId);
+                            await calculateBalances(groupId);
+                            
+                            // After everything is loaded, switch to expenses tab
+                            openTab('expensesTab');
+                            
+                            // Now populate dropdowns after all data is loaded
+                            setTimeout(() => {
+                                try {
+                                    populateMemberDropdowns();
+                                } catch (dropdownError) {
+                                    console.error('Error populating dropdowns:', dropdownError);
+                                }
+                            }, 300); // Increased timeout to ensure DOM is ready
+                            
+                        } catch (dataError) {
+                            console.error('Error loading additional group data:', dataError);
+                            // Still show what we have even if some data failed to load
+                        }
+                        
+                    } catch (parseError) {
+                        console.error('Error parsing group details JSON:', parseError);
+                        alert(`Failed to parse group details: ${parseError.message}`);
+                        
+                        if (titleElement) {
+                            titleElement.textContent = 'Error loading group';
+                        }
+                    }
+                } else {
+                    console.error(`Failed to fetch group details: Status ${detailsResponse.status}`, responseText);
+                    alert(`Failed to fetch group details (${detailsResponse.status}): ${responseText}`);
+                    
+                    if (titleElement) {
+                        titleElement.textContent = 'Error loading group';
+                    }
+                }
+            } catch (error) {
+                console.error('Error viewing group details:', error);
+                alert(`Network error while loading group details: ${error.message}`);
+                
+                const titleElement = document.getElementById('groupDetailsTitle');
+                if (titleElement) {
+                    titleElement.textContent = 'Error loading group';
+                }
+            }
+        }
+
+        // Display Group Members
+        function displayGroupMembers(members) {
+            const membersList = document.getElementById('membersList');
+            membersList.innerHTML = '<h3>Group Members</h3>';
+            
+            if (!members || members.length === 0) {
+                membersList.innerHTML += '<p>No members in this group.</p>';
+                return;
+            }
+
+            // Get current user and virtual members
+            const currentUserMember = members.find(m => 
+                Number(m.id) === Number(currentUserId) && m.member_type === 'regular'
+            );
+            
+            const virtualMembers = members.filter(m => 
+                m.member_type === 'virtual'
+            );
+            
+            // Create an organized list
+            const memberList = document.createElement('div');
+            memberList.className = 'members-list-container';
+            
+            // If current user is a member, show them first as "You (Owner)"
+            if (currentUserMember) {
+                const userElement = document.createElement('div');
+                userElement.className = 'member-item owner';
+                userElement.innerHTML = `
+                    <div class="member-name">${currentUserMember.username || currentUserMember.email} (You - Owner)</div>
+                `;
+                memberList.appendChild(userElement);
+            }
+            
+            // Then add virtual members
+            if (virtualMembers.length > 0) {
+                virtualMembers.forEach(member => {
+                    const memberElement = document.createElement('div');
+                    memberElement.className = 'member-item';
+                    memberElement.innerHTML = `
+                        <div class="member-name">${member.username}</div>
+                    `;
+                    memberList.appendChild(memberElement);
+                });
+            }
+            
+            membersList.appendChild(memberList);
+        }
+
+        // Close Modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            currentGroupId = null;
+            currentGroupMembers = [];
+        }
+
+        // Tab Navigation
+        function openTab(tabId) {
+            try {
+                // Verify the tab exists
+                const targetTab = document.getElementById(tabId);
+                if (!targetTab) {
+                    console.warn(`Tab with id ${tabId} not found`);
+                    return;
+                }
+                
+                // Hide all tab contents
+                const tabContents = document.getElementsByClassName('tab-content');
+                for (let i = 0; i < tabContents.length; i++) {
+                    tabContents[i].classList.remove('active');
+                }
+                
+                // Remove active class from all tabs
+                const tabs = document.getElementsByClassName('tab');
+                for (let i = 0; i < tabs.length; i++) {
+                    tabs[i].classList.remove('active');
+                }
+                
+                // Show the selected tab content
+                targetTab.classList.add('active');
+                
+                // Add active class to the clicked tab
+                const tabIndex = ['membersTab', 'expensesTab', 'balancesTab', 'addExpenseTab'].indexOf(tabId);
+                if (tabIndex >= 0 && tabs.length > tabIndex) {
+                    tabs[tabIndex].classList.add('active');
+                } else {
+                    console.warn(`Tab button for ${tabId} not found at expected index ${tabIndex}`);
+                }
+            } catch (error) {
+                console.error('Error opening tab:', error);
+            }
+        }
+
+        // Populate Member Dropdowns
+        function populateMemberDropdowns() {
+            const paidBySelect = document.getElementById('paidBy');
+            const payerSelect = document.getElementById('payer');
+            const payeeSelect = document.getElementById('payee');
+            const splitOptions = document.getElementById('splitOptions');
+            
+            // Check if elements exist before proceeding
+            if (!paidBySelect || !splitOptions) {
+                console.warn('Missing required elements for member dropdowns');
+                return;
+            }
+            
+            // Clear previous options
+            paidBySelect.innerHTML = '';
+            
+            // Only clear other dropdowns if they exist
+            if (payerSelect) payerSelect.innerHTML = '';
+            if (payeeSelect) payeeSelect.innerHTML = '';
+            
+            // Get valid members (current user and virtual members only)
+            const allowedMembers = [];
+            
+            // Find current user
+            const currentUser = currentGroupMembers.find(member => 
+                Number(member.id) === Number(currentUserId) && member.member_type === 'regular'
+            );
+            
+            // Add current user if found
+            if (currentUser) {
+                allowedMembers.push({
+                    ...currentUser,
+                    displayName: currentUser.username || currentUser.email || 'You',
+                    isCurrentUser: true
+                });
+            }
+            
+            // Find virtual members (excluding test9)
+            const virtualMembers = currentGroupMembers.filter(member => {
+                if (member.member_type !== 'virtual') return false;
+                
+                // Skip test9 member
+                const username = member.username || '';
+                const email = member.email || '';
+                if (username.toLowerCase().includes('test9') || email.toLowerCase().includes('test9')) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            if (virtualMembers.length > 0) {
+                virtualMembers.forEach(member => {
+                    allowedMembers.push({
+                        ...member,
+                        displayName: member.username || 'Unknown',
+                        isCurrentUser: false
+                    });
+                });
+            }
+            
+            // Add allowed members to dropdowns
+            allowedMembers.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.id;
+                option.textContent = member.isCurrentUser 
+                    ? `${member.displayName} (You)` 
+                    : member.displayName;
+                
+                // Add to paid by dropdown
+                paidBySelect.appendChild(option.cloneNode(true));
+                
+                // Add to payer/payee dropdowns if they exist
+                if (payerSelect) payerSelect.appendChild(option.cloneNode(true));
+                if (payeeSelect) payeeSelect.appendChild(option.cloneNode(true));
+            });
+            
+            // Store the members in a data attribute for later use
+            splitOptions.dataset.members = JSON.stringify(allowedMembers.map(member => ({
+                id: member.id,
+                name: member.displayName + (member.isCurrentUser ? ' (You)' : '')
+            })));
+            
+            // Set current user as default payer if available
+            if (currentUser) {
+                paidBySelect.value = currentUser.id;
+            }
+            
+            // Set default date to today
+            const expenseDateField = document.getElementById('expenseDate');
+            if (expenseDateField) {
+                expenseDateField.valueAsDate = new Date();
+            }
+            
+            // Initial setup of split options based on default selection
+            updateSplitOptions();
+        }
+        
+        // Update split options based on split type
+        function updateSplitOptions() {
+            const splitTypeSelect = document.getElementById('splitType');
+            const splitOptions = document.getElementById('splitOptions');
+            const amountField = document.getElementById('expenseAmount');
+            
+            // Check if required elements exist
+            if (!splitTypeSelect || !splitOptions) {
+                console.warn('Missing required elements for split options');
+                return;
+            }
+            
+            const splitType = splitTypeSelect.value;
+            const amount = amountField ? (parseFloat(amountField.value) || 0) : 0;
+            
+            // Clear previous options
+            splitOptions.innerHTML = '';
+            
+            // Get all valid members for splitting
+            const members = getMembersForSplit();
+            
+            if (members.length === 0) {
+                splitOptions.innerHTML = '<p>No members available for splitting</p>';
+                return;
+            }
+            
+            if (splitType === 'equal') {
+                // For equal splits, just show who's included
+                const equalAmount = members.length > 0 ? (amount / members.length).toFixed(2) : 0;
+                
+                members.forEach(member => {
+                    const splitDiv = document.createElement('div');
+                    splitDiv.className = 'split-option';
+                    splitDiv.innerHTML = `
+                        <div class="split-equal-item">
+                            <input type="checkbox" id="split_${member.id}" name="splits" value="${member.id}" checked>
+                            <label for="split_${member.id}">${member.name}</label>
+                            <span class="equal-amount">₹${equalAmount}</span>
+                        </div>
+                    `;
+                    splitOptions.appendChild(splitDiv);
+                });
+                
+                // Add a note about equal splitting
+                const equalSplitNote = document.createElement('p');
+                equalSplitNote.className = 'split-note';
+                equalSplitNote.textContent = `Amount will be split equally (₹${equalAmount} each).`;
+                splitOptions.appendChild(equalSplitNote);
+                
+            } else {
+                // For unequal splits, show amount inputs for each member
+                members.forEach(member => {
+                    const splitDiv = document.createElement('div');
+                    splitDiv.className = 'split-item';
+                    splitDiv.innerHTML = `
+                        <div class="split-unequal-item">
+                            <input type="checkbox" id="split_${member.id}" name="splits" value="${member.id}" checked>
+                            <label for="split_${member.id}">${member.name}</label>
+                            <input type="number" id="split_amount_${member.id}" placeholder="Amount" min="0" step="0.01">
+                        </div>
+                    `;
+                    splitOptions.appendChild(splitDiv);
+                });
+            }
+        }
+
+        // Fetch Group Expenses
+        async function fetchGroupExpenses(groupId) {
+            try {
+                console.log(`Fetching expenses for group: ${groupId}`);
+                
+                const response = await fetch(`http://localhost:5002/api/groups/${groupId}/expenses`, {
+                    headers: { 'Authorization': token }
+                });
+                
+                console.log(`Expenses response status: ${response.status}`);
+                const responseText = await response.text();
+                console.log(`Expenses response text:`, responseText);
+                
+                if (response.ok) {
+                    try {
+                        const expenses = JSON.parse(responseText);
+                        console.log(`Parsed ${expenses.length} expenses`);
+                        displayGroupExpenses(expenses);
+                    } catch (parseError) {
+                        console.error('Error parsing expenses JSON:', parseError);
+                        document.getElementById('expensesList').innerHTML = 
+                            `<p class="error">Error parsing expenses data</p>`;
+                    }
+                } else {
+                    console.error(`Error fetching expenses: Status ${response.status}`, responseText);
+                    document.getElementById('expensesList').innerHTML = 
+                        `<p class="error">Failed to load expenses (${response.status})</p>`;
+                }
+            } catch (error) {
+                console.error('Network error fetching group expenses:', error);
+                document.getElementById('expensesList').innerHTML = 
+                    `<p class="error">Network error loading expenses: ${error.message}</p>`;
+            }
+        }
+
+        // Display Group Expenses
+        function displayGroupExpenses(expenses) {
+            const expensesList = document.getElementById('expensesList');
+            expensesList.innerHTML = '';
+            
+            if (expenses.length === 0) {
+                expensesList.innerHTML = '<p>No expenses recorded for this group yet.</p>';
+                return;
+            }
+            
+            expenses.forEach(expense => {
+                // Format the paid by name properly
+                let paidByName = expense.paid_by_name || 'Unknown';
+                
+                // Try to find paid_by user in current group members
+                if (currentGroupMembers.length > 0) {
+                    const paidByMember = currentGroupMembers.find(member => member.id === expense.paid_by);
+                    if (paidByMember) {
+                        paidByName = paidByMember.username || paidByMember.email || 'Unknown';
+                    }
+                }
+                
+                const expenseElement = document.createElement('div');
+                expenseElement.className = 'expense-item';
+                expenseElement.innerHTML = `
+                    <div class="expense-info">
+                        <h3>${expense.description || expense.title}</h3>
+                        <p class="amount">₹${parseFloat(expense.amount).toFixed(2)}</p>
+                        <p>Paid by: ${paidByName}</p>
+                        <p>Date: ${new Date(expense.date).toLocaleDateString()}</p>
+                        ${expense.notes ? `<p>Notes: ${expense.notes}</p>` : ''}
+                    </div>
+                    <button onclick="deleteExpense(${expense.id})">Delete</button>
+                `;
+                expensesList.appendChild(expenseElement);
+            });
+        }
+
+        // Calculate Balances
+        async function calculateBalances(groupId) {
+            try {
+                console.log(`Fetching balances for group: ${groupId}`);
+                
+                const response = await fetch(`http://localhost:5002/api/groups/${groupId}/balances`, {
+                    headers: { 'Authorization': token }
+                });
+                
+                console.log(`Balances response status: ${response.status}`);
+                const responseText = await response.text();
+                console.log(`Balances response text:`, responseText);
+                
+                if (response.ok) {
+                    try {
+                        const balances = JSON.parse(responseText);
+                        console.log('Parsed balances:', balances);
+                        displayBalances(balances);
+                    } catch (parseError) {
+                        console.error('Error parsing balances JSON:', parseError);
+                        document.getElementById('balancesList').innerHTML = 
+                            `<p class="error">Error parsing balances data</p>`;
+                    }
+                } else {
+                    console.error(`Error fetching balances: Status ${response.status}`, responseText);
+                    document.getElementById('balancesList').innerHTML = 
+                        `<p class="error">Failed to load balances (${response.status})</p>`;
+                }
+            } catch (error) {
+                console.error('Network error calculating balances:', error);
+                document.getElementById('balancesList').innerHTML = 
+                    `<p class="error">Network error loading balances: ${error.message}</p>`;
+            }
+        }
+
+        // Display Balances
+        function displayBalances(balances) {
+            const balancesList = document.getElementById('balancesList');
+            balancesList.innerHTML = '';
+            
+            if (!balances || !balances.net_balances || balances.net_balances.length === 0) {
+                balancesList.innerHTML = '<p>No balances to display. Add expenses to see who owes what.</p>';
+                return;
+            }
+            
+            const netBalances = document.createElement('div');
+            netBalances.innerHTML = '<h3>Net Balances</h3>';
+            
+            // Display net balance for each member
+            const netSection = document.createElement('div');
+            netSection.className = 'balance-section';
+            
+            balances.net_balances.forEach(balance => {
+                const balanceClass = parseFloat(balance.amount) >= 0 ? 'positive-balance' : 'negative-balance';
+                // Get name from current members if possible
+                let memberName = balance.name || balance.email || 'Unknown';
+                
+                if (currentGroupMembers.length > 0) {
+                    const member = currentGroupMembers.find(m => m.id === balance.id);
+                    if (member) {
+                        memberName = member.username || member.email || 'Unknown';
+                    }
+                }
+                
+                const balanceItem = document.createElement('div');
+                balanceItem.className = 'balance-item';
+                balanceItem.innerHTML = `
+                    <span>${memberName}</span>
+                    <span class="${balanceClass}">₹${parseFloat(balance.amount).toFixed(2)}</span>
+                `;
+                netSection.appendChild(balanceItem);
+            });
+            
+            netBalances.appendChild(netSection);
+            balancesList.appendChild(netBalances);
+            
+            // Display who owes whom
+            if (balances.detailed_balances && balances.detailed_balances.length > 0) {
+                const owesSection = document.createElement('div');
+                owesSection.innerHTML = '<h3>Who Owes Whom</h3>';
+                
+                const detailedSection = document.createElement('div');
+                detailedSection.className = 'balance-section';
+                
+                balances.detailed_balances.forEach(balance => {
+                    // Get names from current members if possible
+                    let fromName = balance.from_name || balance.from_email || 'Unknown';
+                    let toName = balance.to_name || balance.to_email || 'Unknown';
+                    
+                    if (currentGroupMembers.length > 0) {
+                        const fromMember = currentGroupMembers.find(m => m.id === balance.from_id);
+                        if (fromMember) {
+                            fromName = fromMember.username || fromMember.email || 'Unknown';
+                        }
+                        
+                        const toMember = currentGroupMembers.find(m => m.id === balance.to_id);
+                        if (toMember) {
+                            toName = toMember.username || toMember.email || 'Unknown';
+                        }
+                    }
+                    
+                    const balanceItem = document.createElement('div');
+                    balanceItem.className = 'balance-item';
+                    balanceItem.innerHTML = `
+                        <span>${fromName} owes ${toName}</span>
+                        <span class="negative-balance">₹${parseFloat(balance.amount).toFixed(2)}</span>
+                    `;
+                    detailedSection.appendChild(balanceItem);
+                });
+                
+                owesSection.appendChild(detailedSection);
+                balancesList.appendChild(owesSection);
+            }
+        }
+
+        // Add Expense to Group
+        document.getElementById('addExpenseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentGroupId) {
+                alert('No group selected');
+                return;
+            }
+            
+            const title = document.getElementById('expenseTitle').value;
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const paidBy = document.getElementById('paidBy').value;
+            const date = document.getElementById('expenseDate').value;
+            const notes = document.getElementById('expenseNotes').value;
+            const splitType = document.getElementById('splitType').value;
+            
+            // Get selected split members
+            const splitCheckboxes = document.querySelectorAll('input[name="splits"]:checked');
+            if (splitCheckboxes.length === 0) {
+                alert('Please select at least one member to split the expense with');
+                return;
+            }
+            
+            const splits = [];
+            const selectedMembers = Array.from(splitCheckboxes).map(checkbox => checkbox.value);
+            
+            if (splitType === 'equal') {
+                // For equal splits, calculate the amount per person
+                const equalSplitAmount = amount / selectedMembers.length;
+                
+                // Create splits with equal amounts
+                selectedMembers.forEach(memberId => {
+                    splits.push({
+                        user_id: parseInt(memberId),
+                        amount: equalSplitAmount
+                    });
+                });
+            } else {
+                // For unequal splits, get the specified amounts
+                let totalSpecified = 0;
+                
+                selectedMembers.forEach(memberId => {
+                    const amountInput = document.getElementById(`split_amount_${memberId}`);
+                    const splitAmount = amountInput.value ? parseFloat(amountInput.value) : 0;
+                    
+                    if (splitAmount <= 0) {
+                        alert(`Please enter a valid amount for each selected member.`);
+                        throw new Error('Invalid split amount');
+                    }
+                    
+                    totalSpecified += splitAmount;
+                    
+                    splits.push({
+                        user_id: parseInt(memberId),
+                        amount: splitAmount
+                    });
+                });
+                
+                // Validate that the sum matches the total expense amount
+                if (Math.abs(totalSpecified - amount) > 0.01) {
+                    alert(`The sum of splits (${totalSpecified.toFixed(2)}) doesn't match the total expense amount (${amount.toFixed(2)})`);
+                    return;
+                }
+            }
+            
+            try {
+                const response = await fetch(`http://localhost:5002/api/groups/${currentGroupId}/expenses`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({
+                        description: title,
+                        amount,
+                        paid_by: parseInt(paidBy),
+                        date,
+                        notes,
+                        splits
+                    })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('addExpenseForm').reset();
+                    document.getElementById('expenseDate').valueAsDate = new Date();
+                    
+                    // Refresh expenses and balances
+                    await fetchGroupExpenses(currentGroupId);
+                    await calculateBalances(currentGroupId);
+                    
+                    // Switch to expenses tab
+                    openTab('expensesTab');
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to add expense');
+                }
+            } catch (error) {
+                console.error('Error adding expense:', error);
+                alert('Failed to add expense');
+            }
+        });
+
+        // Settle Up
+        document.getElementById('settleUpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentGroupId) {
+                alert('No group selected');
+                return;
+            }
+            
+            const payer = document.getElementById('payer').value;
+            const payee = document.getElementById('payee').value;
+            const amount = document.getElementById('settleAmount').value;
+            
+            if (payer === payee) {
+                alert('Payer and payee cannot be the same person');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://localhost:5002/api/groups/${currentGroupId}/settle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({
+                        payer: parseInt(payer),
+                        payee: parseInt(payee),
+                        amount
+                    })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('settleUpForm').reset();
+                    
+                    // Refresh balances
+                    await calculateBalances(currentGroupId);
+                    
+                    alert('Settlement recorded successfully');
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to record settlement');
+                }
+            } catch (error) {
+                console.error('Error settling up:', error);
+                alert('Failed to record settlement');
+            }
+        });
+
+        // Delete Expense
+        async function deleteExpense(expenseId) {
+            if (!confirm('Are you sure you want to delete this expense?')) {
+                return;
+            }
+            
+            try {
+                console.log(`Deleting expense ${expenseId} from group ${currentGroupId}`);
+                
+                const response = await fetch(`http://localhost:5002/api/groups/${currentGroupId}/expenses/${expenseId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Expense deleted successfully');
+                    
+                    // Refresh expenses and balances
+                    await fetchGroupExpenses(currentGroupId);
+                    await calculateBalances(currentGroupId);
+                } else {
+                    const errorText = await response.text();
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        alert(`Failed to delete expense: ${errorData.error || 'Unknown error'}`);
+                    } catch (e) {
+                        alert(`Failed to delete expense: ${errorText || response.status}`);
+                    }
+                }
+            } catch (error) {
+                console.error('Error deleting expense:', error);
+                alert(`Network error deleting expense: ${error.message}`);
+            }
+        }
+
+        // Delete Group
+        async function deleteGroup(groupId) {
+            if (!confirm('Are you sure you want to delete this group? All expenses will be permanently deleted.')) return;
+            
+            try {
+                const response = await fetch(`http://localhost:5002/api/groups/${groupId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': token
+                    }
+                });
+                
+                if (response.ok) {
+                    fetchGroups();
+                    
+                    // Close modal if open
+                    if (currentGroupId === groupId) {
+                        closeModal('groupDetailsModal');
+                    }
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to delete group');
+                }
+            } catch (error) {
+                console.error('Error deleting group:', error);
+                alert('Failed to delete group');
+            }
+        }
+
+        // Update equal split note when amount changes
+        function updateEqualSplit() {
+            const splitType = document.getElementById('splitType').value;
+            if (splitType !== 'equal') return;
+            
+            const amount = parseFloat(document.getElementById('expenseAmount').value) || 0;
+            const splitCheckboxes = document.querySelectorAll('input[name="splits"]:checked');
+            const memberCount = splitCheckboxes.length;
+            
+            const splitNote = document.querySelector('.split-note p');
+            if (splitNote && memberCount > 0) {
+                const equalSplitAmount = amount / memberCount;
+                splitNote.textContent = `Amount will be split equally: ₹${equalSplitAmount.toFixed(2)} per person.`;
+            }
+        }
+        
+        // Listen for checkbox changes in split options
+        document.addEventListener('change', function(e) {
+            if (e.target.matches('input[name="splits"]')) {
+                updateEqualSplit();
+            }
+        });
+
+        // Get members for splitting
+        function getMembersForSplit() {
+            const members = [];
+            
+            // Check if currentGroupMembers is available
+            if (!currentGroupMembers || !Array.isArray(currentGroupMembers) || currentGroupMembers.length === 0) {
+                console.warn('No current group members available');
+                return members;
+            }
+            
+            try {
+                // Try to get members from dataset first
+                const splitOptions = document.getElementById('splitOptions');
+                if (splitOptions && splitOptions.dataset.members) {
+                    try {
+                        const parsedMembers = JSON.parse(splitOptions.dataset.members);
+                        if (Array.isArray(parsedMembers) && parsedMembers.length > 0) {
+                            // Filter out any test9 member
+                            return parsedMembers.filter(member => 
+                                !member.name.toLowerCase().includes('test9')
+                            );
+                        }
+                    } catch (e) {
+                        console.warn('Error parsing members from dataset:', e);
+                    }
+                }
+                
+                // If dataset approach fails, build the list from currentGroupMembers
+                currentGroupMembers.forEach(member => {
+                    if (!member || !member.id) return; // Skip invalid members
+                    
+                    // Skip test9 member
+                    const username = member.username || '';
+                    const email = member.email || '';
+                    if (username.toLowerCase().includes('test9') || email.toLowerCase().includes('test9')) {
+                        return;
+                    }
+                    
+                    // Format the member name properly
+                    let memberName = member.username || member.email || 'Unknown';
+                    
+                    // Add a 'You' indicator for the current user
+                    if (member.id === parseInt(currentUserId) && member.member_type === 'regular') {
+                        memberName += ' (You)';
+                    }
+                    
+                    members.push({
+                        id: member.id,
+                        name: memberName,
+                        type: member.member_type || 'unknown'
+                    });
+                });
+            } catch (error) {
+                console.error('Error getting members for split:', error);
+            }
+            
+            return members;
+        }
+    </script>
+</body>
+</html> 

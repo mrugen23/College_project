@@ -1,0 +1,371 @@
+/* Import the common CSS */
+@import url('common.css');
+
+/* Expenses Page Specific Styles */
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-md) 0;
+    position: relative;
+    margin-bottom: var(--spacing-lg);
+}
+
+.logo {
+    text-align: center;
+}
+
+.logo img {
+    height: 50px;
+}
+
+.back-button {
+    position: absolute;
+    left: 0;
+    text-decoration: none;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    transition: background-color var(--transition-fast);
+    font-weight: 500;
+}
+
+.back-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.expenses-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.expenses-header h1 {
+    margin-bottom: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.expenses-container {
+    background-color: var(--surface-color);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.expense-filters {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.filter-group select, 
+.filter-group input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    background-color: var(--surface-color);
+    font-size: var(--font-size-md);
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.filter-group select:focus, 
+.filter-group input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+/* Expense List */
+.expenses-list {
+    margin-top: var(--spacing-lg);
+}
+
+.no-expenses {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--text-tertiary);
+    font-style: italic;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: var(--border-radius-md);
+}
+
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.expense-item:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+    transform: translateX(4px);
+}
+
+.expense-item:last-child {
+    border-bottom: none;
+}
+
+.expense-details {
+    flex: 1;
+}
+
+.expense-category {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: rgba(76, 175, 80, 0.1);
+    color: var(--primary-color);
+    border-radius: var(--border-radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+    position: relative;
+}
+
+/* Category colors */
+.expense-category.food {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4CAF50; /* Green */
+}
+
+.expense-category.transportation {
+    background-color: rgba(33, 150, 243, 0.1);
+    color: #2196F3; /* Blue */
+}
+
+.expense-category.entertainment {
+    background-color: rgba(156, 39, 176, 0.1);
+    color: #9C27B0; /* Purple */
+}
+
+.expense-category.utilities {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: #FF9800; /* Orange */
+}
+
+.expense-category.rent {
+    background-color: rgba(233, 30, 99, 0.1);
+    color: #E91E63; /* Pink */
+}
+
+.expense-category.shopping {
+    background-color: rgba(0, 188, 212, 0.1);
+    color: #00BCD4; /* Cyan */
+}
+
+.expense-category.healthcare {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #F44336; /* Red */
+}
+
+.expense-category.other {
+    background-color: rgba(97, 97, 97, 0.1);
+    color: #616161; /* Grey */
+}
+
+/* Budget badge */
+.budget-badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-left: var(--spacing-xs);
+    background-color: rgba(96, 125, 139, 0.1);
+    color: #607D8B; /* Blue Grey */
+    border-radius: var(--border-radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    vertical-align: middle;
+}
+
+.expense-description {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.expense-date {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+}
+
+.expense-amount {
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+    color: var(--text-primary);
+}
+
+.expense-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.edit-expense, .delete-expense {
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.edit-expense {
+    color: var(--primary-color);
+}
+
+.delete-expense {
+    color: var(--danger-color);
+}
+
+.edit-expense:hover, .delete-expense:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: scale(1.1);
+}
+
+/* Form hint */
+.form-hint {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-top: var(--spacing-xs);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+    animation: fadeIn var(--transition-normal);
+    backdrop-filter: blur(3px);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    position: relative;
+    background-color: #ffffff;
+    margin: 10% auto;
+    padding: var(--spacing-xl);
+    width: 90%;
+    max-width: 500px;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    animation: slideDown var(--transition-normal);
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-tertiary);
+    transition: color var(--transition-fast);
+}
+
+.close-button:hover {
+    color: var(--text-primary);
+}
+
+/* Loading indicator */
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(76, 175, 80, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .expenses-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+    
+    .expense-filters {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .expense-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .expense-amount {
+        margin-top: var(--spacing-sm);
+    }
+    
+    .expense-actions {
+        margin-top: var(--spacing-sm);
+        align-self: flex-end;
+    }
+    
+    .modal-content {
+        margin: 20% auto;
+        padding: var(--spacing-lg);
+        width: 95%;
+    }
+} 
